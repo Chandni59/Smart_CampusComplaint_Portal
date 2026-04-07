@@ -77,7 +77,6 @@ const Register = () => {
             <label className="form-label">Role</label>
             <select name="role" className="form-select" value={form.role} onChange={handle}>
               <option value="student">Student</option>
-              <option value="admin">Admin</option>
             </select>
           </div>
           <button type="submit" className="btn-primary" disabled={loading}>

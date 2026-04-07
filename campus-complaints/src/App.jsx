@@ -1,4 +1,5 @@
 import React from 'react'
+import ComplaintDetails from './pages/ComplaintDetails';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './components/AuthContext'
 import Navbar from './components/Navbar'
@@ -37,7 +38,9 @@ const Layout = () => {
         <Route path="/submit"        element={<PrivateRoute role="student"><SubmitComplaint /></PrivateRoute>} />
         <Route path="/my-complaints" element={<PrivateRoute role="student"><MyComplaints /></PrivateRoute>} />
         <Route path="/admin"         element={<PrivateRoute role="admin"><AdminDashboard /></PrivateRoute>} />
+        <Route path="/complaint/:id" element={<ComplaintDetails />} />
         <Route path="*"              element={<Navigate to="/" replace />} />
+        
       </Routes>
     </div>
   )

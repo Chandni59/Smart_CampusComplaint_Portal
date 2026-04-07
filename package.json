@@ -1,0 +1,25 @@
+{
+  "name": "campus-complaints",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/harinihubb/campus-complaints.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/harinihubb/campus-complaints/issues"
+  },
+  "homepage": "https://github.com/harinihubb/campus-complaints#readme",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "mssql": "^12.2.1"
+  }
+}

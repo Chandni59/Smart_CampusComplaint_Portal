@@ -358,3 +358,279 @@ tbody td { padding: 14px 16px; font-size: 0.875rem; vertical-align: middle; }
   .navbar { padding: 0 1rem; }
   .stats-grid { grid-template-columns: repeat(2, 1fr); }
 }
+/* 🔥 Modern Form Styling */
+
+.modern-form input,
+.modern-form textarea,
+.modern-form select {
+  width: 100%;
+  padding: 12px;
+  margin-top: 6px;
+  border-radius: 8px;
+  border: 1px solid #374151;
+  background: #111827;
+  color: white;
+  outline: none;
+}
+
+.modern-form textarea {
+  min-height: 100px;
+  resize: none;
+}
+
+.form-group {
+  margin-bottom: 18px;
+}
+
+.form-row {
+  display: flex;
+  gap: 20px;
+}
+
+.upload-box {
+  display: block;
+  border: 2px dashed #4f46e5;
+  padding: 20px;
+  text-align: center;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.upload-box:hover {
+  background: rgba(79, 70, 229, 0.1);
+}
+
+.upload-content {
+  color: #9ca3af;
+}
+
+.file-name {
+  margin-top: 10px;
+  color: #22c55e;
+}
+
+.submit-btn {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(90deg, #6366f1, #8b5cf6);
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.submit-btn:hover {
+  opacity: 0.9;
+}
+/* 🔥 DETAILS PAGE */
+
+.details-card {
+  max-width: 800px;
+  margin: auto;
+  padding: 25px;
+  background: #111827;
+  border-radius: 12px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.3);
+}
+
+.details-title {
+  font-size: 28px;
+  margin-bottom: 10px;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 20px;
+  color: white;
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+
+.details-grid p {
+  margin: 10px 0;
+}
+
+/* 🔥 TIMELINE */
+
+.timeline {
+  display: flex;
+  justify-content: space-between;
+  margin: 25px 0;
+}
+
+.step {
+  flex: 1;
+  text-align: center;
+  padding: 10px;
+  border-bottom: 3px solid #374151;
+  color: #9ca3af;
+}
+
+.step.active {
+  border-color: #6366f1;
+  color: white;
+}
+
+/* 🔥 IMAGE */
+
+.image-box img {
+  width: 100%;
+  border-radius: 10px;
+  margin-top: 10px;
+}
+/* 🔥 HEADER ALIGN */
+.details-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* 🔥 CARD */
+.details-card {
+  max-width: 850px;
+  margin: auto;
+  padding: 25px;
+  background: #111827;
+  border-radius: 12px;
+}
+
+/* 🔥 STATUS BADGE RIGHT SIDE */
+.status-badge {
+  padding: 6px 14px;
+  border-radius: 20px;
+  color: white;
+  font-size: 14px;
+}
+
+/* 🔥 DETAILS */
+.details-grid p {
+  margin: 10px 0;
+}
+
+/* 🔥 ADMIN BOX */
+.admin-update-box {
+  margin: 20px 0;
+  padding: 15px;
+  background: #1f2937;
+  border-radius: 10px;
+}
+
+.update-row {
+  display: flex;
+  gap: 10px;
+}
+
+.update-row select {
+  flex: 1;
+  padding: 10px;
+  border-radius: 8px;
+  background: #111827;
+  color: white;
+  border: 1px solid #374151;
+}
+
+.update-row button {
+  padding: 10px 16px;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #6366f1, #8b5cf6);
+  border: none;
+  color: white;
+  cursor: pointer;
+}
+
+/* 🔥 TIMELINE */
+.timeline {
+  display: flex;
+  justify-content: space-between;
+  margin: 30px 0;
+}
+
+.step {
+  flex: 1;
+  text-align: center;
+  border-bottom: 3px solid #374151;
+  padding: 10px;
+  color: #9ca3af;
+}
+
+.step.active {
+  border-color: #6366f1;
+  color: white;
+}
+
+.step small {
+  display: block;
+  margin-top: 5px;
+  font-size: 12px;
+}
+
+.pending {
+  opacity: 0.4;
+}
+
+/* 🔥 IMAGE */
+.image-box img {
+  width: 100%;
+  border-radius: 10px;
+  margin-top: 10px;
+}
+.details-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.status-badge {
+  padding: 6px 14px;
+  border-radius: 20px;
+  color: white;
+  font-size: 14px;
+}
+
+.timeline {
+  display: flex;
+  justify-content: space-between;
+  margin: 30px 0;
+}
+
+.step {
+  flex: 1;
+  text-align: center;
+  border-bottom: 3px solid #374151;
+  padding: 10px;
+  color: #9ca3af;
+}
+
+.step.active {
+  border-color: #6366f1;
+  color: white;
+}
+
+.step small {
+  display: block;
+  margin-top: 5px;
+  font-size: 12px;
+}
+.priority-badge {
+  padding: 5px 12px;
+  border-radius: 20px;
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.priority-badge.High {
+  background: #ef4444;
+}
+
+.priority-badge.Medium {
+  background: #f59e0b;
+}
+
+.priority-badge.Low {
+  background: #22c55e;
+}

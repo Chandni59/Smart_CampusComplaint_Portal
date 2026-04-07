@@ -3,42 +3,123 @@ import { useNavigate } from 'react-router-dom';
 import { submitComplaint } from '../services/api';
 import { useAuth } from '../components/AuthContext';
 
-const CATEGORIES = ['WiFi', 'Hostel', 'Equipment', 'Library'];
+const CATEGORIES = ['WiFi', 'Hostel', 'Equipment', 'Library', 'Electricity', 'Water', 'Cleanliness'];
 
 const SubmitComplaint = () => {
   const { user } = useAuth();
   const navigate  = useNavigate();
 
-  const [form, setForm]       = useState({ title: '', description: '', category: 'WiFi', location: '' });
+  const [form, setForm] = useState({
+    title: '',
+    description: '',
+    category: 'WiFi',
+    priority: '',
+    location: ''
+  });
+
+  const [file, setFile] = useState(null);
   const [fileName, setFileName] = useState('');
-  const [error, setError]     = useState('');
+
+  const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handle = e => setForm({ ...form, [e.target.name]: e.target.value });
+  const handle = e => {
+    setForm(prev => ({
+      ...prev,
+      [e.target.name]: e.target.value
+    }));
+  };
 
   const handleFile = e => {
     const f = e.target.files[0];
-    if (f) setFileName(f.name);
+    if (f) {
+      setFile(f);
+      setFileName(f.name);
+    }
+  };
+
+  // 🔥 ANALYZE FUNCTION
+  const analyzeText = async (text) => {
+    if (!text) return;
+
+    try {
+      const res = await fetch("http://localhost:5000/api/analyze", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ description: text })
+      });
+
+      const data = await res.json();
+
+      console.log("API RESULT:", data);
+
+      // 🔥 update only category & priority safely
+      setForm(prev => ({
+        ...prev,
+        category: data.category,
+        priority: data.priority
+      }));
+
+    } catch (err) {
+      console.error("Analyze error:", err);
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(''); setSuccess('');
-    if (!form.title.trim())       return setError('Title is required');
+    setError('');
+    setSuccess('');
+
+    if (!form.title.trim()) return setError('Title is required');
     if (!form.description.trim()) return setError('Description is required');
-    if (!form.location.trim())    return setError('Location is required');
+    if (!form.location.trim()) return setError('Location is required');
 
     setLoading(true);
+
     try {
-      const result = await submitComplaint({ ...form, userId: user?.id, imageUrl: fileName || null });
-      console.log('[Submit] Complaint created:', result);
-      setSuccess('Complaint submitted successfully! Redirecting to your complaints…');
-      setForm({ title: '', description: '', category: 'WiFi', location: '' });
+      let imageUrl = null;
+
+      // 🔥 Upload file
+      if (file) {
+        const formData = new FormData();
+        formData.append("file", file);
+
+        const res = await fetch("http://localhost:5000/api/upload", {
+          method: "POST",
+          body: formData
+        });
+
+        const data = await res.json();
+        imageUrl = data.url;
+      }
+
+      // 🔥 Save complaint
+      await submitComplaint({
+        ...form,
+        userId: user?.id,
+        imageUrl
+      });
+
+      setSuccess('Complaint submitted successfully!');
+
+      setForm({
+        title: '',
+        description: '',
+        category: 'WiFi',
+        priority: '',
+        location: ''
+      });
+
+      setFile(null);
       setFileName('');
-      setTimeout(() => navigate('/my-complaints'), 2000);
+
+      setTimeout(() => navigate('/my-complaints'), 1500);
+
     } catch (err) {
-      setError(err.message || 'Failed to submit. Please try again.');
+      setError(err.message || 'Failed to submit.');
     } finally {
       setLoading(false);
     }
@@ -51,59 +132,96 @@ const SubmitComplaint = () => {
         <p>Report a campus issue and we'll address it promptly</p>
       </div>
 
-      <div className="form-card">
-        {error   && <div className="alert error">⚠️ {error}</div>}
+      <div className="form-card modern-form">
+        {error && <div className="alert error">⚠️ {error}</div>}
         {success && <div className="alert success">✅ {success}</div>}
 
         <form onSubmit={handleSubmit}>
+
+          {/* TITLE */}
           <div className="form-group">
-            <label className="form-label">Complaint Title *</label>
+            <label>Complaint Title</label>
             <input
-              type="text" name="title" className="form-input"
-              placeholder="Brief summary of the issue"
-              value={form.title} onChange={handle}
+              type="text"
+              name="title"
+              value={form.title}
+              onChange={handle}
+              placeholder="Enter issue title"
             />
           </div>
 
+          {/* DESCRIPTION */}
           <div className="form-group">
-            <label className="form-label">Description *</label>
+            <label>Description</label>
             <textarea
-              name="description" className="form-textarea"
-              placeholder="Describe the issue in detail — when it started, how it affects you, etc."
-              value={form.description} onChange={handle}
+              name="description"
+              value={form.description}
+              onChange={(e) => {
+                const text = e.target.value;
+
+                // update description
+                setForm(prev => ({
+                  ...prev,
+                  description: text
+                }));
+
+                // 🔥 analyze live
+                analyzeText(text);
+              }}
+              placeholder="Describe the issue clearly..."
             />
           </div>
 
+          {/* CATEGORY + PRIORITY */}
           <div className="form-row">
             <div className="form-group">
-              <label className="form-label">Category *</label>
-              <select name="category" className="form-select" value={form.category} onChange={handle}>
-                {CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+              <label>Category</label>
+              <select name="category" value={form.category} onChange={handle}>
+                {CATEGORIES.map(c => <option key={c}>{c}</option>)}
               </select>
             </div>
+
             <div className="form-group">
-              <label className="form-label">Location *</label>
+              <label>Priority</label>
               <input
-                type="text" name="location" className="form-input"
-                placeholder="e.g. Block A, Room 204"
-                value={form.location} onChange={handle}
+                value={form.priority}
+                readOnly
+                placeholder="Auto-detected"
               />
             </div>
           </div>
 
+          {/* LOCATION */}
           <div className="form-group">
-            <label className="form-label">Attach Image (optional)</label>
-            <label className="file-upload-area">
-              <input type="file" accept="image/*" onChange={handleFile} />
-              <div className="file-upload-icon">📎</div>
-              <p>Click to upload a photo of the issue</p>
-              {fileName && <div className="file-name">✅ {fileName}</div>}
-            </label>
+            <label>Location</label>
+            <input
+              type="text"
+              name="location"
+              value={form.location}
+              onChange={handle}
+              placeholder="Block / Room"
+            />
           </div>
 
-          <button type="submit" className="btn-submit" disabled={loading}>
-            {loading ? '⏳ Submitting…' : '🚀 Submit Complaint'}
+          {/* FILE UPLOAD */}
+          <div className="form-group">
+            <label>Attach Image</label>
+
+            <label className="upload-box">
+              <input type="file" onChange={handleFile} hidden />
+              <div className="upload-content">
+                📎 Click to upload image
+              </div>
+            </label>
+
+            {fileName && <p className="file-name">✅ {fileName}</p>}
+          </div>
+
+          {/* SUBMIT */}
+          <button className="submit-btn" type="submit" disabled={loading}>
+            {loading ? "Submitting..." : "🚀 Submit Complaint"}
           </button>
+
         </form>
       </div>
     </div>
