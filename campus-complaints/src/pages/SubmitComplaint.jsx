@@ -44,7 +44,7 @@ const SubmitComplaint = () => {
     if (!text) return;
 
     try {
-      const res = await fetch("http://localhost:5000/api/analyze", {
+      const res = await fetch("https://campus-backend.azurewebsites.net/api/analyze", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -87,7 +87,7 @@ const SubmitComplaint = () => {
         const formData = new FormData();
         formData.append("file", file);
 
-        const res = await fetch("http://localhost:5000/api/upload", {
+        const res = await fetch("https://campus-backend.azurewebsites.net/api/upload", {
           method: "POST",
           body: formData
         });
