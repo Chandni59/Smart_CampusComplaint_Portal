@@ -34,12 +34,15 @@ const upload = multer();
 /* =========================
    🔹 AZURE STORAGE
 ========================= */
-const blobServiceClient = BlobServiceClient.fromConnectionString(
-  "DefaultEndpointsProtocol=https;AccountName=campusstorage123;AccountKey=YOUR_KEY;EndpointSuffix=core.windows.net"
-);
+// This reads the connection string from the Azure Portal settings
+const connectionString = process.env.AZURE_STORAGE_CONNECTION_STRING;
 
-const containerClient = blobServiceClient.getContainerClient("complaints");
+if (!connectionString) {
+    console.log("⚠️ AZURE_STORAGE_CONNECTION_STRING is missing!");
+}
 
+const blobServiceClient = BlobServiceClient.fromConnectionString(connectionString);
+const containerClient = blobServiceClient.getContainerClient(process.env.AZURE_STORAGE_CONTAINER_NAME || "complaints");
 /* =========================
    🤖 ANALYZE FUNCTION
 ========================= */
