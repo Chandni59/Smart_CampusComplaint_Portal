@@ -20,8 +20,9 @@ jobs:
       - name: npm install and build
         run: |
           npm install
-          # Using npx prevents the "vite: Permission denied" error
-          npx vite build
+          # Fix the permission denied error by making the vite binary executable
+          chmod +x ./node_modules/.bin/vite
+          npm run build
         working-directory: campus-complaints
 
       - name: Upload artifact for deployment job
