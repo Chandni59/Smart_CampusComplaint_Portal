@@ -20,14 +20,15 @@ jobs:
       - name: npm install and build
         run: |
           npm install
-          npm run build
+          # Using npx prevents the "vite: Permission denied" error
+          npx vite build
         working-directory: campus-complaints
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: node-app
-          path: campus-complaints/dist # We only upload the final built website
+          path: campus-complaints/dist
 
   deploy:
     runs-on: ubuntu-latest
@@ -47,5 +48,5 @@ jobs:
         with:
           app-name: 'campus-complaints-web'
           slot-name: 'Production'
-          package: . # Here it's '.' because we already downloaded only the 'dist' contents
+          package: .
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_13B0CEE036704CF0930873C569C677EE }}
