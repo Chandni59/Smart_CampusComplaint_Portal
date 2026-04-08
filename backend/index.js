@@ -184,6 +184,10 @@ app.put("/api/complaints/:id", async (req, res) => {
 /* =========================
    🚀 START
 ========================= */
-app.listen(5000, () => {
-  console.log("Server running on port 5000 🚀");
+// This tells the app to listen on the port Azure provides, 
+// and the '0.0.0.0' allows it to accept external traffic.
+const PORT = process.env.PORT || 5000;
+
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server is running on port ${PORT}`);
 });
