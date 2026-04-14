@@ -9,85 +9,82 @@ const ComplaintDetails = () => {
   const [complaint, setComplaint] = useState(null);
   const [newStatus, setNewStatus] = useState("");
 
-  // 🔥 FETCH COMPLAINT
+  // 🔥 FETCH COMPLAINT - Corrected Endpoint to /api/complaints
   useEffect(() => {
-    fetch("https://campus-backend-csf7ffbzg7eedcfm.centralindia-01.azurewebsites.net/api/upload")
+    fetch("https://campus-backend-csf7ffbzg7eedcfm.centralindia-01.azurewebsites.net/api/complaints")
       .then(res => res.json())
       .then(data => {
+        // Find the specific complaint by ID
         const found = data.find(c => c.id == id);
         setComplaint(found);
-      });
+      })
+      .catch(err => console.error("Error fetching complaint:", err));
   }, [id]);
 
-  // 🔥 UPDATE STATUS (REAL-TIME FIX)
+  // 🔥 UPDATE STATUS - Corrected Endpoint
   const updateStatus = async () => {
     if (!newStatus) return alert("Select status");
 
-    await fetch(`https://campus-backend-csf7ffbzg7eedcfm.centralindia-01.azurewebsites.net/api/upload/${complaint.id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status: newStatus })
-    });
+    try {
+      const response = await fetch(`https://campus-backend-csf7ffbzg7eedcfm.centralindia-01.azurewebsites.net/api/complaints/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus })
+      });
 
-    const now = new Date().toISOString();
+      if (!response.ok) throw new Error("Update failed");
 
-    // 🔥 UPDATE UI WITHOUT RELOAD
-    setComplaint(prev => ({
-      ...prev,
-      status: newStatus,
-      updatedAt:
-        newStatus === "In Progress" || newStatus === "Resolved"
-          ? now
-          : prev.updatedAt,
-      resolvedAt:
-        newStatus === "Resolved"
-          ? now
-          : prev.resolvedAt
-    }));
+      const now = new Date().toISOString();
 
-    setNewStatus("");
+      // Update UI locally so it reflects immediately
+      setComplaint(prev => ({
+        ...prev,
+        status: newStatus,
+        updatedAt: now,
+        resolvedAt: newStatus === "Resolved" ? now : prev.resolvedAt
+      }));
+
+      setNewStatus("");
+      alert("Status updated successfully! ✅");
+    } catch (err) {
+      alert("Error updating status: " + err.message);
+    }
   };
 
-  if (!complaint) return <p>Loading...</p>;
+  if (!complaint) return (
+    <div className="page-content">
+      <div className="loading-spinner">⏳ Loading complaint details...</div>
+    </div>
+  );
 
-  // 🔥 STATUS COLOR
   const statusColor =
     complaint.status === "Resolved" ? "#22c55e" :
     complaint.status === "In Progress" ? "#f59e0b" : "#6b7280";
 
-  // 🔥 TIMELINE LOGIC
-  const isInProgress =
-    complaint.status === "In Progress" || complaint.status === "Resolved";
-
-  const isResolved =
-    complaint.status === "Resolved";
+  const isInProgress = complaint.status === "In Progress" || complaint.status === "Resolved";
+  const isResolved = complaint.status === "Resolved";
 
   return (
     <div className="page-content">
       <div className="details-card">
 
-        {/* 🔥 HEADER */}
+        {/* HEADER */}
         <div className="details-header">
           <h1>{complaint.title}</h1>
-
           <div style={{ display: "flex", gap: "10px" }}>
-            {/* STATUS */}
             <span className="status-badge" style={{ background: statusColor }}>
               {complaint.status}
             </span>
-
-            {/* 🔥 PRIORITY */}
             <span className={`priority-badge ${complaint.priority || 'Low'}`}>
               {complaint.priority || 'Low'}
             </span>
           </div>
         </div>
 
-        {/* 🔥 ADMIN UPDATE */}
+        {/* ADMIN UPDATE SECTION */}
         {user?.role === "admin" && (
           <div className="admin-update-box">
             <h3>Update Status</h3>
-
             <div className="update-row">
               <select
                 value={newStatus}
@@ -97,58 +94,55 @@ const ComplaintDetails = () => {
                 <option value="In Progress">In Progress</option>
                 <option value="Resolved">Resolved</option>
               </select>
-
-              <button onClick={updateStatus}>🚀 Update</button>
+              <button className="update-btn" onClick={updateStatus}>🚀 Update</button>
             </div>
           </div>
         )}
 
-        {/* 🔥 DETAILS */}
+        {/* COMPLAINT INFO */}
         <div className="details-grid">
           <p><b>Description:</b> {complaint.description}</p>
           <p><b>Category:</b> {complaint.category}</p>
           <p><b>Location:</b> {complaint.location}</p>
         </div>
 
-        {/* 🔥 TIMELINE */}
+        {/* VISUAL TIMELINE */}
         <div className="timeline">
-
-          {/* Submitted */}
           <div className="step active">
             Submitted
             <small>{new Date(complaint.date).toLocaleString()}</small>
           </div>
 
-          {/* In Progress */}
           <div className={`step ${isInProgress ? "active" : ""}`}>
             In Progress
             <small>
-              {complaint.updatedAt
-                ? new Date(complaint.updatedAt).toLocaleString()
+              {complaint.updatedAt 
+                ? new Date(complaint.updatedAt).toLocaleString() 
                 : isInProgress ? "Started" : "Pending"}
             </small>
           </div>
 
-          {/* Resolved */}
           <div className={`step ${isResolved ? "active" : ""}`}>
             Resolved
             <small>
-              {complaint.resolvedAt
-                ? new Date(complaint.resolvedAt).toLocaleString()
+              {complaint.resolvedAt 
+                ? new Date(complaint.resolvedAt).toLocaleString() 
                 : isResolved ? "Completed" : "Pending"}
             </small>
           </div>
-
         </div>
 
-        {/* 🔥 IMAGE */}
+        {/* IMAGE ATTACHMENT */}
         {complaint.imageUrl && (
           <div className="image-box">
             <h3>📸 Attached Image</h3>
-            <img src={complaint.imageUrl} alt="complaint" />
+            <img 
+              src={complaint.imageUrl} 
+              alt="complaint" 
+              onError={(e) => e.target.style.display='none'} 
+            />
           </div>
         )}
-
       </div>
     </div>
   );
