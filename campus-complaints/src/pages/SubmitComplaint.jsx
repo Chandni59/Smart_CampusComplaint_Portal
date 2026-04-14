@@ -44,7 +44,7 @@ const SubmitComplaint = () => {
     if (!text) return;
 
     try {
-      const res = await fetch("https://campus-backend.azurewebsites.net/api/analyze", {
+      const res = await fetch("https://campus-backend-csf7ffbzg7eedcfm.centralindia-01.azurewebsites.net/api/upload", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"

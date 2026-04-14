@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BASE_URL = 'https://campus-backend-csf7ffbzg7eedcfm.centralindia-01.azurewebsites.net';
+const BASE_URL = 'https://campus-backend-csf7ffbzg7eedcfm.centralindia-01.azurewebsites.net/api/upload';
 
 const api = axios.create({
   baseURL: BASE_URL,
