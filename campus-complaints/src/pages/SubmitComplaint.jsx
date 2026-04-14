@@ -3,28 +3,31 @@ import { useNavigate } from 'react-router-dom';
 import { submitComplaint } from '../services/api';
 import { useAuth } from '../components/AuthContext';
 
-const CATEGORIES = ['WiFi', 'Hostel', 'Equipment', 'Library', 'Electricity', 'Water', 'Cleanliness'];
+const CATEGORIES = ['WiFi', 'Hostel', 'Equipment', 'Library', 'Electricity', 'Water', 'Cleanliness', 'Other'];
 
 const SubmitComplaint = () => {
   const { user } = useAuth();
-  const navigate  = useNavigate();
+  const navigate = useNavigate();
 
+  // 🔥 State for the form
   const [form, setForm] = useState({
     title: '',
     description: '',
-    category: 'WiFi',
-    priority: '',
+    category: 'Other', // Default to Other
+    priority: 'Low',   // Default to Low
     location: ''
   });
 
   const [file, setFile] = useState(null);
   const [fileName, setFileName] = useState('');
-
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handle = e => {
+  // Your real Azure Backend URL
+  const BACKEND_BASE = "https://campus-backend-csf7ffbzg7eedcfm.centralindia-01.azurewebsites.net";
+
+  const handleInput = e => {
     setForm(prev => ({
       ...prev,
       [e.target.name]: e.target.value
@@ -39,24 +42,22 @@ const SubmitComplaint = () => {
     }
   };
 
-  // 🔥 ANALYZE FUNCTION
+  // 🔥 AI ANALYZE FUNCTION
   const analyzeText = async (text) => {
-    if (!text) return;
+    if (text.length < 5) return; // Don't call API for very short text
 
     try {
-      const res = await fetch("https://campus-backend-csf7ffbzg7eedcfm.centralindia-01.azurewebsites.net/api/analyze", {
+      const res = await fetch(`${BACKEND_BASE}/api/analyze`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ description: text })
       });
 
+      if (!res.ok) throw new Error("AI Analysis failed");
+      
       const data = await res.json();
 
-      console.log("API RESULT:", data);
-
-      // 🔥 update only category & priority safely
+      // Automatically update the UI with detected category/priority
       setForm(prev => ({
         ...prev,
         category: data.category,
@@ -82,44 +83,40 @@ const SubmitComplaint = () => {
     try {
       let imageUrl = null;
 
-      // 🔥 Upload file
+      // 1. 🔥 Handle Image Upload if file exists
       if (file) {
         const formData = new FormData();
         formData.append("file", file);
 
-        const res = await fetch("https://campus-backend-csf7ffbzg7eedcfm.centralindia-01.azurewebsites.net/api/upload", {
+        const uploadRes = await fetch(`${BACKEND_BASE}/api/upload`, {
           method: "POST",
           body: formData
         });
 
-        const data = await res.json();
-        imageUrl = data.url;
+        if (!uploadRes.ok) throw new Error("Image upload failed");
+        
+        const uploadData = await uploadRes.json();
+        imageUrl = uploadData.url;
       }
 
-      // 🔥 Save complaint
+      // 2. 🔥 Submit Complaint to SQL Database
       await submitComplaint({
         ...form,
         userId: user?.id,
-        imageUrl
+        imageUrl: imageUrl
       });
 
-      setSuccess('Complaint submitted successfully!');
-
-      setForm({
-        title: '',
-        description: '',
-        category: 'WiFi',
-        priority: '',
-        location: ''
-      });
-
+      setSuccess('Complaint submitted successfully! Redirecting...');
+      
+      // Clear form
+      setForm({ title: '', description: '', category: 'Other', priority: 'Low', location: '' });
       setFile(null);
       setFileName('');
 
-      setTimeout(() => navigate('/my-complaints'), 1500);
+      setTimeout(() => navigate('/my-complaints'), 2000);
 
     } catch (err) {
-      setError(err.message || 'Failed to submit.');
+      setError(err.message || 'Failed to submit. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -137,7 +134,6 @@ const SubmitComplaint = () => {
         {success && <div className="alert success">✅ {success}</div>}
 
         <form onSubmit={handleSubmit}>
-
           {/* TITLE */}
           <div className="form-group">
             <label>Complaint Title</label>
@@ -145,8 +141,9 @@ const SubmitComplaint = () => {
               type="text"
               name="title"
               value={form.title}
-              onChange={handle}
-              placeholder="Enter issue title"
+              onChange={handleInput}
+              placeholder="E.g., WiFi disconnected in Block B"
+              required
             />
           </div>
 
@@ -158,35 +155,33 @@ const SubmitComplaint = () => {
               value={form.description}
               onChange={(e) => {
                 const text = e.target.value;
-
-                // update description
-                setForm(prev => ({
-                  ...prev,
-                  description: text
-                }));
-
-                // 🔥 analyze live
-                analyzeText(text);
+                setForm(prev => ({ ...prev, description: text }));
+                analyzeText(text); // Call AI analysis live
               }}
-              placeholder="Describe the issue clearly..."
+              placeholder="Describe the issue clearly. Our AI will detect category and priority."
+              required
             />
           </div>
 
           {/* CATEGORY + PRIORITY */}
           <div className="form-row">
             <div className="form-group">
-              <label>Category</label>
-              <select name="category" value={form.category} onChange={handle}>
-                {CATEGORIES.map(c => <option key={c}>{c}</option>)}
+              <label>Detected Category</label>
+              <select name="category" value={form.category} onChange={handleInput}>
+                {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
               </select>
             </div>
 
             <div className="form-group">
-              <label>Priority</label>
+              <label>Priority Level</label>
               <input
                 value={form.priority}
                 readOnly
-                placeholder="Auto-detected"
+                className={`priority-input ${form.priority}`}
+                style={{ 
+                    fontWeight: 'bold', 
+                    color: form.priority === 'High' ? '#ef4444' : (form.priority === 'Medium' ? '#f59e0b' : '#10b981') 
+                }}
               />
             </div>
           </div>
@@ -198,30 +193,27 @@ const SubmitComplaint = () => {
               type="text"
               name="location"
               value={form.location}
-              onChange={handle}
-              placeholder="Block / Room"
+              onChange={handleInput}
+              placeholder="Block / Room / Department"
+              required
             />
           </div>
 
           {/* FILE UPLOAD */}
           <div className="form-group">
-            <label>Attach Image</label>
-
+            <label>Attach Evidence (Image)</label>
             <label className="upload-box">
-              <input type="file" onChange={handleFile} hidden />
+              <input type="file" accept="image/*" onChange={handleFile} hidden />
               <div className="upload-content">
-                📎 Click to upload image
+                {fileName ? `✅ ${fileName}` : "📎 Click to upload a photo"}
               </div>
             </label>
-
-            {fileName && <p className="file-name">✅ {fileName}</p>}
           </div>
 
           {/* SUBMIT */}
           <button className="submit-btn" type="submit" disabled={loading}>
-            {loading ? "Submitting..." : "🚀 Submit Complaint"}
+            {loading ? "Processing..." : "🚀 Submit Complaint"}
           </button>
-
         </form>
       </div>
     </div>
