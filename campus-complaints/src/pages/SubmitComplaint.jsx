@@ -87,7 +87,7 @@ const SubmitComplaint = () => {
         const formData = new FormData();
         formData.append("file", file);
 
-        const res = await fetch("https://campus-backend.azurewebsites.net/api/upload", {
+        const res = await fetch("https://campus-backend-csf7ffbzg7eedcfm.centralindia-01.azurewebsites.net/api/upload", {
           method: "POST",
           body: formData
         });
