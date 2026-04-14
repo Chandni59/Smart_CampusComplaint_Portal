@@ -11,7 +11,7 @@ const ComplaintDetails = () => {
 
   // 🔥 FETCH COMPLAINT
   useEffect(() => {
-    fetch("http://localhost:5000/api/complaints")
+    fetch("https://campus-backend-csf7ffbzg7eedcfm.centralindia-01.azurewebsites.net/api/upload")
       .then(res => res.json())
       .then(data => {
         const found = data.find(c => c.id == id);
@@ -23,7 +23,7 @@ const ComplaintDetails = () => {
   const updateStatus = async () => {
     if (!newStatus) return alert("Select status");
 
-    await fetch(`http://localhost:5000/api/complaints/${complaint.id}`, {
+    await fetch(`https://campus-backend-csf7ffbzg7eedcfm.centralindia-01.azurewebsites.net/api/upload/${complaint.id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status: newStatus })
