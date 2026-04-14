@@ -190,9 +190,12 @@ app.put("/api/complaints/:id", async (req, res) => {
 });
 
 /* =========================
-   🚀 START SERVER
+    🚀 START SERVER
 ========================= */
-const PORT = process.env.PORT || 5000;
+// Azure App Service provides the PORT, but 8080 is the standard for containers
+const PORT = process.env.PORT || 8080; 
+
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server is running on port ${PORT}`);
+    console.log(`Cloud check: Accepting traffic on all interfaces via 0.0.0.0`);
 });
