@@ -3,6 +3,15 @@ const sql = require("mssql");
 const cors = require("cors");
 const multer = require("multer");
 const { BlobServiceClient } = require("@azure/storage-blob");
+const { GoogleGenAI } = require("@google/genai");
+
+// Initialize Gemini SDK globally
+let ai;
+try {
+  ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+} catch (e) {
+  console.log("⚠️ Gemini API Key not found or invalid.");
+}
 
 const app = express();
 app.use(cors());
@@ -52,20 +61,52 @@ try {
 }
 
 /* =========================
-   🤖 ANALYZE FUNCTION
+   🤖 ANALYZE FUNCTION (AI-POWERED)
 ========================= */
-function analyzeComplaint(text) {
+async function analyzeComplaint(text) {
+  if (ai) {
+    try {
+      const prompt = `Analyze the following campus complaint and classify it into one of these exact categories: WiFi, Hostel, Equipment, Library, Electricity, Water, Cleanliness, Other.
+Also, assign a priority level: High, Medium, Low based on urgency.
+Return ONLY valid JSON with keys "category" and "priority".
+Complaint: "${text}"`;
+
+      const response = await ai.models.generateContent({
+        model: "gemini-2.5-flash",
+        contents: prompt,
+        config: { temperature: 0.1 }
+      });
+
+      let resText = response.text.trim();
+      if (resText.startsWith("\`\`\`json")) {
+          resText = resText.replace(/\`\`\`json/g, "").replace(/\`\`\`/g, "").trim();
+      } else if (resText.startsWith("\`\`\`")) {
+          resText = resText.replace(/\`\`\`/g, "").trim();
+      }
+      
+      const parsed = JSON.parse(resText);
+      const validCategories = ['WiFi', 'Hostel', 'Equipment', 'Library', 'Electricity', 'Water', 'Cleanliness', 'Other'];
+      const validPriorities = ['High', 'Medium', 'Low'];
+      
+      return {
+        category: validCategories.includes(parsed.category) ? parsed.category : "Other",
+        priority: validPriorities.includes(parsed.priority) ? parsed.priority : "Low"
+      };
+    } catch (error) {
+      console.error("AI Analysis Error:", error);
+    }
+  }
+
+  // Fallback Logic
   const lower = text.toLowerCase();
   let category = "Other";
   let priority = "Low";
 
-  // Category Detection
   if (lower.includes("wifi") || lower.includes("internet")) category = "WiFi";
   else if (lower.includes("projector") || lower.includes("fan") || lower.includes("ac")) category = "Equipment";
   else if (lower.includes("hostel") || lower.includes("room")) category = "Hostel";
   else if (lower.includes("water")) category = "Water";
 
-  // Priority Detection
   if (lower.includes("urgent") || lower.includes("not working") || lower.includes("broken")) {
     priority = "High";
   } else if (lower.includes("slow") || lower.includes("issue") || lower.includes("sometimes")) {
@@ -78,9 +119,9 @@ function analyzeComplaint(text) {
 /* =========================
    📡 ANALYZE API
 ========================= */
-app.post("/api/analyze", (req, res) => {
+app.post("/api/analyze", async (req, res) => {
   const { description } = req.body;
-  const result = analyzeComplaint(description || "");
+  const result = await analyzeComplaint(description || "");
   res.json(result);
 });
 
@@ -186,6 +227,50 @@ app.put("/api/complaints/:id", async (req, res) => {
     res.send("Updated");
   } catch (err) {
     res.status(500).send("Update failed");
+  }
+});
+
+/* =========================
+   🤖 AI CHATBOT API
+========================= */
+// Gemini SDK is already initialized at the top
+
+app.post("/api/chat", async (req, res) => {
+  try {
+    const { history, message } = req.body;
+    
+    if (!ai) {
+      return res.status(503).json({ error: "AI service is not configured. Please add GEMINI_API_KEY." });
+    }
+
+    const systemInstruction = `You are a helpful and friendly campus support AI assistant. 
+Your job is to help students with their queries and guide them on how to file complaints using the campus portal.
+Be concise, empathetic, and professional. 
+If they want to file a complaint, remind them they can go to the "Submit Complaint" section in their dashboard.`;
+
+    const formattedContents = (history || []).map(h => ({
+      role: h.role === "user" ? "user" : "model",
+      parts: [{ text: h.text }]
+    }));
+    
+    formattedContents.push({
+      role: "user",
+      parts: [{ text: message }]
+    });
+
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: formattedContents,
+      config: {
+        systemInstruction: systemInstruction,
+        temperature: 0.7
+      }
+    });
+
+    res.json({ reply: response.text });
+  } catch (err) {
+    console.error("Chat API Error:", err);
+    res.status(500).json({ error: "Failed to process chat message" });
   }
 });
 

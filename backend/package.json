@@ -11,6 +11,7 @@
   "license": "ISC",
   "dependencies": {
     "@azure/storage-blob": "^12.31.0",
+    "@google/genai": "^1.51.0",
     "cors": "^2.8.6",
     "express": "^5.2.1",
     "mssql": "^12.2.1",

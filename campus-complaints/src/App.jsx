@@ -9,6 +9,7 @@ import Dashboard from './pages/Dashboard'
 import SubmitComplaint from './pages/SubmitComplaint'
 import MyComplaints from './pages/MyComplaints'
 import AdminDashboard from './pages/AdminDashboard'
+import Chatbot from './components/Chatbot'
 
 const PrivateRoute = ({ children, role }) => {
   const { user, loading } = useAuth()
@@ -42,6 +43,7 @@ const Layout = () => {
         <Route path="*"              element={<Navigate to="/" replace />} />
         
       </Routes>
+      <Chatbot />
     </div>
   )
 }

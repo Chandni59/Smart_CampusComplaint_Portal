@@ -166,14 +166,14 @@ const SubmitComplaint = () => {
           {/* CATEGORY + PRIORITY */}
           <div className="form-row">
             <div className="form-group">
-              <label>Detected Category</label>
+              <label>✨ AI Detected Category</label>
               <select name="category" value={form.category} onChange={handleInput}>
                 {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
               </select>
             </div>
 
             <div className="form-group">
-              <label>Priority Level</label>
+              <label>✨ AI Priority Level</label>
               <input
                 value={form.priority}
                 readOnly

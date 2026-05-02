@@ -32,3 +32,8 @@ export const updateComplaintStatus = async (id, status) => {
   const res = await api.put(`/complaints/${id}`, { status });
   return res.data;
 };
+
+export const sendChatMessage = async (message, history) => {
+  const res = await api.post('/chat', { message, history });
+  return res.data;
+};
