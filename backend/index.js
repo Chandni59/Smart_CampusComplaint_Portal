@@ -74,15 +74,13 @@ Complaint: "${text}"`;
       const response = await ai.models.generateContent({
         model: "gemini-2.5-flash",
         contents: prompt,
-        config: { temperature: 0.1 }
+        config: { 
+          temperature: 0.1,
+          responseMimeType: "application/json"
+        }
       });
 
       let resText = response.text.trim();
-      if (resText.startsWith("\`\`\`json")) {
-          resText = resText.replace(/\`\`\`json/g, "").replace(/\`\`\`/g, "").trim();
-      } else if (resText.startsWith("\`\`\`")) {
-          resText = resText.replace(/\`\`\`/g, "").trim();
-      }
       
       const parsed = JSON.parse(resText);
       const validCategories = ['WiFi', 'Hostel', 'Equipment', 'Library', 'Electricity', 'Water', 'Cleanliness', 'Other'];

@@ -48,29 +48,29 @@ const ComplaintDetails = () => {
   };
 
   return (
-    <div className="modern-details-wrapper page-animate">
-      <div className="modern-container">
+    <div className="details-card page-animate">
+      <div className="details-card-inner">
         
         {/* --- HEADER --- */}
-        <header className="complaint-header">
+        <header className="details-header">
           <div className="header-top">
-            <span className={`cat-tag`}>{complaint.category}</span>
-            <div className={`priority-pill ${complaint.priority}`}>
+            <span className={`badge category`}>{complaint.category}</span>
+            <div className={`priority-badge ${complaint.priority}`}>
               {complaint.priority} Priority
             </div>
           </div>
-          <h1>{complaint.title}</h1>
+          <h1 className="details-title">{complaint.title}</h1>
           <p className="meta-info">Reported on {new Date(complaint.date).toLocaleDateString()} • ID: #{complaint.id}</p>
         </header>
 
         {/* --- DYNAMIC TIMELINE --- */}
-        <div className="stepper-wrapper">
+        <div className="timeline">
           {[
             { label: "Submitted", icon: "📩" },
             { label: "In Progress", icon: "⚙️" },
             { label: "Resolved", icon: "✅" }
           ].map((step, index) => (
-            <div key={index} className={`step-item ${getStatusStep() > index ? "active" : ""}`}>
+            <div key={index} className={`step ${getStatusStep() > index ? "active" : "pending"}`}>
               <div className="step-node">{step.icon}</div>
               <p>{step.label}</p>
               {index < 2 && <div className="step-line"></div>}
@@ -79,20 +79,20 @@ const ComplaintDetails = () => {
         </div>
 
         {/* --- MAIN CONTENT --- */}
-        <main className="content-grid">
+        <main className="details-grid">
           <section className="text-section">
             <h3>Issue Description</h3>
             <p className="description-p">{complaint.description}</p>
             
             <div className="info-box">
-              <span>📍 <strong>Location:</strong> {complaint.location}</span>
-              <span>👤 <strong>Reporting Status:</strong> {complaint.status}</span>
+              <p>📍 <strong>Location:</strong> {complaint.location}</p>
+              <p>👤 <strong>Reporting Status:</strong> <span className={`status-badge ${complaint.status.toLowerCase().replace(' ', '-')}`}>{complaint.status}</span></p>
             </div>
 
             {user?.role === "admin" && (
-              <div className="admin-action-card">
+              <div className="admin-update-box">
                 <h4>Management Controls</h4>
-                <div className="action-row">
+                <div className="update-row">
                   <select value={newStatus} onChange={(e) => setNewStatus(e.target.value)}>
                     <option value="">Update Current Status</option>
                     <option value="In Progress">Move to In Progress</option>
@@ -104,7 +104,7 @@ const ComplaintDetails = () => {
             )}
           </section>
 
-          <section className="image-section">
+          <section className="image-box">
             <h3>Evidence</h3>
             {complaint.imageUrl ? (
               <div className="image-frame">

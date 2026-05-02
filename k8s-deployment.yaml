@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: campus-backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: campus-backend
+  template:
+    metadata:
+      labels:
+        app: campus-backend
+    spec:
+      containers:
+      - name: campus-backend
+        image: your-dockerhub-username/campus-backend:latest
+        ports:
+        - containerPort: 8080
+        env:
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: backend-secrets
+              key: DB_USER
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: backend-secrets
+              key: DB_PASSWORD
+        - name: DB_SERVER
+          valueFrom:
+            secretKeyRef:
+              name: backend-secrets
+              key: DB_SERVER
+        - name: DB_DATABASE
+          valueFrom:
+            secretKeyRef:
+              name: backend-secrets
+              key: DB_DATABASE
+        - name: GEMINI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: backend-secrets
+              key: GEMINI_API_KEY
+        - name: AZURE_STORAGE_CONNECTION_STRING
+          valueFrom:
+            secretKeyRef:
+              name: backend-secrets
+              key: AZURE_STORAGE_CONNECTION_STRING
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: campus-backend-service
+spec:
+  type: LoadBalancer
+  selector:
+    app: campus-backend
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
