@@ -190,7 +190,13 @@ app.post("/api/complaints", async (req, res) => {
 
 app.get("/api/complaints", async (req, res) => {
   try {
-    const result = await sql.query`SELECT * FROM Complaints ORDER BY date DESC`;
+    const { userId } = req.query;
+    let result;
+    if (userId) {
+      result = await sql.query`SELECT * FROM Complaints WHERE userId = ${userId} ORDER BY date DESC`;
+    } else {
+      result = await sql.query`SELECT * FROM Complaints ORDER BY date DESC`;
+    }
     res.json(result.recordset);
   } catch (err) {
     res.status(500).send("Fetch failed");
