@@ -53,9 +53,9 @@ const Chatbot = ({ user }) => {
             {messages.map((msg, index) => {
               // Convert markdown bold to html bold, and newlines to <br/>
               const formattedText = msg.text
-                .replace(/\\*\\*(.*?)\\*\\*/g, '<b>$1</b>')
-                .replace(/\\*(.*?)\\*/g, '<i>$1</i>')
-                .replace(/\\n/g, '<br />');
+                .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
+                .replace(/\*(.*?)\*/g, '<i>$1</i>')
+                .replace(/\n/g, '<br />');
 
               return (
                 <div 
