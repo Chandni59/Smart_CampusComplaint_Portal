@@ -43,7 +43,7 @@ const Layout = () => {
         <Route path="*"              element={<Navigate to="/" replace />} />
         
       </Routes>
-      <Chatbot />
+      <Chatbot user={user} />
     </div>
   )
 }

@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { sendChatMessage } from '../services/api';
 
-const Chatbot = () => {
+const Chatbot = ({ user }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
     { role: 'model', text: 'Hi there! 👋 I am your Campus Assistant. How can I help you today?' }
@@ -27,7 +27,7 @@ const Chatbot = () => {
     setLoading(true);
 
     try {
-      const response = await sendChatMessage(userMessage.text, messages);
+      const response = await sendChatMessage(userMessage.text, messages, user?.id);
       setMessages(prev => [...prev, { role: 'model', text: response.reply }]);
     } catch (error) {
       setMessages(prev => [...prev, { role: 'model', text: 'Oops! I am having trouble connecting to the server. Please check your Gemini API Key.' }]);
@@ -50,11 +50,21 @@ const Chatbot = () => {
           </div>
           
           <div className="chatbot-messages">
-            {messages.map((msg, index) => (
-              <div key={index} className={`chatbot-message ${msg.role === 'user' ? 'user-msg' : 'model-msg'}`}>
-                {msg.text}
-              </div>
-            ))}
+            {messages.map((msg, index) => {
+              // Convert markdown bold to html bold, and newlines to <br/>
+              const formattedText = msg.text
+                .replace(/\\*\\*(.*?)\\*\\*/g, '<b>$1</b>')
+                .replace(/\\*(.*?)\\*/g, '<i>$1</i>')
+                .replace(/\\n/g, '<br />');
+
+              return (
+                <div 
+                  key={index} 
+                  className={`chatbot-message ${msg.role === 'user' ? 'user-msg' : 'model-msg'}`}
+                  dangerouslySetInnerHTML={{ __html: formattedText }}
+                />
+              );
+            })}
             {loading && (
               <div className="chatbot-message model-msg loading-dots">
                 <span>.</span><span>.</span><span>.</span>

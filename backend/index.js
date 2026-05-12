@@ -235,16 +235,32 @@ app.put("/api/complaints/:id", async (req, res) => {
 
 app.post("/api/chat", async (req, res) => {
   try {
-    const { history, message } = req.body;
+    const { history, message, userId } = req.body;
     
     if (!ai) {
       return res.status(503).json({ error: "AI service is not configured. Please add GEMINI_API_KEY." });
     }
 
+    let userContext = "";
+    if (userId) {
+      try {
+        const result = await sql.query`SELECT id, title, status, category FROM Complaints WHERE userId=${userId}`;
+        if (result.recordset && result.recordset.length > 0) {
+          userContext = `\n\nUser's Current Complaints:\n${JSON.stringify(result.recordset, null, 2)}\nUse this information to update the user about their complaints if they ask. Do not use Markdown formatting (like asterisks or bold text) in your responses, as it will break the frontend rendering. Use plain text and simple new lines.`;
+        } else {
+          userContext = `\n\nThe user currently has no complaints filed. Do not use Markdown formatting in your responses.`;
+        }
+      } catch (e) {
+        console.error("Error fetching user complaints for chat:", e);
+      }
+    } else {
+       userContext = `\n\nDo not use Markdown formatting in your responses.`;
+    }
+
     const systemInstruction = `You are a helpful and friendly campus support AI assistant. 
 Your job is to help students with their queries and guide them on how to file complaints using the campus portal.
 Be concise, empathetic, and professional. 
-If they want to file a complaint, remind them they can go to the "Submit Complaint" section in their dashboard.`;
+If they want to file a complaint, remind them they can go to the "Submit Complaint" section in their dashboard.${userContext}`;
 
     const formattedContents = (history || []).map(h => ({
       role: h.role === "user" ? "user" : "model",

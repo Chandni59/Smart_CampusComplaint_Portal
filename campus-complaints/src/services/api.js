@@ -33,7 +33,7 @@ export const updateComplaintStatus = async (id, status) => {
   return res.data;
 };
 
-export const sendChatMessage = async (message, history) => {
-  const res = await api.post('/chat', { message, history });
+export const sendChatMessage = async (message, history, userId) => {
+  const res = await api.post('/chat', { message, history, userId });
   return res.data;
 };
